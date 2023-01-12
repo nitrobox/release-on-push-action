@@ -21,8 +21,8 @@
     false))
 
 (defn assert-valid-bump-version-scheme [bump-version-scheme]
-  (when-not (contains? #{"major" "minor" "patch" "norelease"} bump-version-scheme)
-    (throw (ex-info (str "Invalid bump-version-scheme. Expected one of major|minor|patch|norelease. Got: " bump-version-scheme) {:bump-version-scheme bump-version-scheme})))
+  (when-not (contains? #{"major" "minor" "patch" "no-release"} bump-version-scheme)
+    (throw (ex-info (str "Invalid bump-version-scheme. Expected one of major|minor|patch|no-release. Got: " bump-version-scheme) {:bump-version-scheme bump-version-scheme})))
   bump-version-scheme)
 
 (defn context-from-env
@@ -67,9 +67,9 @@
 (defn bump-version-scheme [context related-data]
   (let [labels (get-labels (:related-prs related-data))]
     (cond
-      (contains? labels "release:major") :major
-      (contains? labels "release:minor") :minor
-      (contains? labels "release:patch") :patch
+      (contains? labels "major") :major
+      (contains? labels "minor") :minor
+      (contains? labels "patch") :patch
       :else (keyword (:bump-version-scheme context)))))
 
 (defn get-tagged-version [latest-release]
@@ -93,11 +93,11 @@
     (= :norelease (bump-version-scheme context related-data))
     "Skipping release, no version bump found."
 
-    (str/includes? (github/commit-title (:commit related-data)) "[norelease]")
-    "Skipping release. Reason: git commit title contains [norelease]"
+    (str/includes? (github/commit-title (:commit related-data)) "[no-release]")
+    "Skipping release. Reason: git commit title contains [no-release]"
 
-    (contains? (get-labels (get-in related-data [:related-prs])) "norelease")
-    "Skipping release. Reason: related PR has label norelease"))
+    (contains? (get-labels (get-in related-data [:related-prs])) "no-release")
+    "Skipping release. Reason: related PR has label no-release"))
 
 (defn generate-new-release-data [context related-data]
   (let [bump-version-scheme (bump-version-scheme context related-data)
